@@ -2,28 +2,32 @@ package com.produtosGo.controller;
 
 import com.produtosGo.dto.auth.LoginRequestDto;
 import com.produtosGo.dto.auth.LoginResponseDto;
+import com.produtosGo.dto.auth.RegisterRequestDto;
 import com.produtosGo.services.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
-        // O controller recebe os dados do DTO, passa para o service processar
-        LoginResponseDto response = authService.autenticar(request);
+    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request) {
+        return authService.login(request);
+    }
 
-        // Retorna o JWT gerado com status 200 OK
-        return ResponseEntity.ok(response);
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LoginResponseDto register(@Valid @RequestBody RegisterRequestDto request) {
+        return authService.register(request);
     }
 }
+
 
