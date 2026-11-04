@@ -1,6 +1,6 @@
 package com.produtosGo.dto.auth;
 
-import com.produtosGo.enums.TypeUsers;
+import com.produtosGo.enums.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +10,7 @@ public record RegisterRequestDto(
         @NotBlank @Size(max = 150) String name,
         @NotBlank @Email @Size(max = 254) String email,
         @NotBlank @Size(min = 8, max = 72) String password_hash,
-        @NotNull TypeUsers type
+        @NotNull UserType type
 ) {
 
     @Override

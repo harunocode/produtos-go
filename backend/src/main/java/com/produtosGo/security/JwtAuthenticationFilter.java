@@ -1,6 +1,6 @@
 package com.produtosGo.security;
 
-import com.produtosGo.enums.TypeUsers;
+import com.produtosGo.enums.UserType;
 import com.produtosGo.services.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extractClaims(token);
 
             String email = claims.getSubject();
-            TypeUsers type = TypeUsers.valueOf(claims.get("type", String.class).toUpperCase());
+            UserType type = UserType.valueOf(claims.get("type", String.class).toUpperCase());
 
             var authentication =
                     new UsernamePasswordAuthenticationToken(

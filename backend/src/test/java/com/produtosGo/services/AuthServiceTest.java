@@ -3,7 +3,7 @@ package com.produtosGo.services;
 import com.produtosGo.dto.auth.LoginRequestDto;
 import com.produtosGo.dto.auth.RegisterRequestDto;
 import com.produtosGo.entities.Users;
-import com.produtosGo.enums.TypeUsers;
+import com.produtosGo.enums.UserType;
 import com.produtosGo.repository.UsersRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Example;
@@ -38,11 +38,11 @@ class AuthServiceTest {
 
         var service = new AuthService(repository, passwordEncoder, jwtService, fixedClock);
 
-        var response = service.register(new RegisterRequestDto("Maria", "maria@email.com", "senha123", TypeUsers.COSTUMER));
+        var response = service.register(new RegisterRequestDto("Maria", "maria@email.com", "senha123", UserType.COSTUMER));
 
         assertNotNull(response);
         assertEquals("maria@email.com", response.email());
-        assertEquals(TypeUsers.COSTUMER, response.type());
+        assertEquals(UserType.COSTUMER, response.type());
         assertNotNull(response.token());
         assertEquals("Bearer", response.tokenType());
         assertTrue(passwordEncoder.matches("senha123", repository.findByEmail("maria@email.com").orElseThrow().getPassword_hash()));
@@ -60,7 +60,7 @@ class AuthServiceTest {
         user.setName("Joao");
         user.setEmail("joao@email.com");
         user.setPassword_hash(passwordEncoder.encode("senha123"));
-        user.setType(TypeUsers.ESTABLISHMENT);
+        user.setType(UserType.ESTABLISHMENT);
         user.setActive(true);
         repository.save(user);
 
@@ -70,7 +70,7 @@ class AuthServiceTest {
 
         assertNotNull(response);
         assertEquals("joao@email.com", response.email());
-        assertEquals(TypeUsers.ESTABLISHMENT, response.type());
+        assertEquals(UserType.ESTABLISHMENT, response.type());
         assertNotNull(response.token());
     }
 
