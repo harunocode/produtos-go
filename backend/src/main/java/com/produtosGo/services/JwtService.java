@@ -14,15 +14,22 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${security.jwt.secret}")
+    @Value("${security.jwt.secret:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}")
     private String secret;
 
-    @Value("${security.jwt.expiration-ms}")
+    @Value("${security.jwt.expiration-ms:86400000}")
     private long expiration;
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void setExpiration(long expiration) {
+        this.expiration = expiration;
+    }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
-
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -32,13 +39,12 @@ public class JwtService {
             String role) {
 
         Date now = new Date();
-
-        Date expirationDate =
-                new Date(now.getTime() + expiration);
+        Date expirationDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(email)
                 .claim("id", id)
+                .claim("type", role)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expirationDate)
@@ -47,7 +53,6 @@ public class JwtService {
     }
 
     public Claims extractClaims(String token) {
-
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
