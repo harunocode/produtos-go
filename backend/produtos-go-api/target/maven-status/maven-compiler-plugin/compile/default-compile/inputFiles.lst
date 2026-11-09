@@ -1,0 +1,14 @@
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\config\CorsConfig.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\controller\LojaController.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\controller\ProdutoController.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\dto\LojaProximaResponse.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\dto\ProdutoRequest.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\dto\ProdutoResponse.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\entity\Produto.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\exception\ApiExceptionHandler.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\exception\RecursoNaoEncontradoException.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\ProdutosGoApplication.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\repository\LojaRepository.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\repository\ProdutoRepository.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\service\LojaService.java
+C:\Users\ResTIC55\Desktop\Fullstack\produtos-go\backend\produtos-go-api\src\main\java\br\com\produtosgo\service\ProdutoService.java
