@@ -1,0 +1,9 @@
+br\com\produtosgo\service\HorarioFuncionamento.class
+br\com\produtosgo\dto\ProdutoProximoResponse.class
+br\com\produtosgo\repository\CategoriaRepository.class
+br\com\produtosgo\entity\Loja.class
+br\com\produtosgo\service\HorarioFuncionamento$Status.class
+br\com\produtosgo\repository\LojaRepository$LojaProximaRow.class
+br\com\produtosgo\repository\LojaJpaRepository.class
+br\com\produtosgo\dto\HorarioDia.class
+br\com\produtosgo\entity\Categoria.class

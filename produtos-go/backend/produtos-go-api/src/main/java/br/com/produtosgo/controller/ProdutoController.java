@@ -2,6 +2,7 @@ package br.com.produtosgo.controller;
 
 import br.com.produtosgo.dto.ProdutoRequest;
 import br.com.produtosgo.dto.ProdutoResponse;
+import br.com.produtosgo.dto.ProdutoProximoResponse;
 import br.com.produtosgo.service.ProdutoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,16 @@ public class ProdutoController {
 
     @GetMapping
     public List<ProdutoResponse> listar() { return service.listar(); }
+
+    @GetMapping("/proximos")
+    public List<ProdutoProximoResponse> buscarProximos(
+        @RequestParam double latitude,
+        @RequestParam double longitude,
+        @RequestParam(defaultValue = "3000") int raioMetros,
+        @RequestParam(required = false) String categoria
+    ) {
+        return service.buscarProximos(latitude, longitude, raioMetros, categoria);
+    }
 
     @GetMapping("/{id}")
     public ProdutoResponse buscar(@PathVariable Long id) { return service.buscarPorId(id); }

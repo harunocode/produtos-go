@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2ba3846e-3e9c-4526-bd6f-bb7a63185217" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/produtos-go.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/entity/Categoria.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/entity/Loja.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/CategoriaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/LojaJpaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/controller/ProdutoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/controller/ProdutoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/dto/ProdutoRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/dto/ProdutoRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/dto/ProdutoResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/dto/ProdutoResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/entity/Produto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/entity/Produto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/LojaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/LojaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/ProdutoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/repository/ProdutoRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/service/ProdutoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/service/ProdutoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/ProdutosGoApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/ProdutosGoApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/config/CorsConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/controller/LojaController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/controller/LojaController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/controller/ProdutoController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/controller/ProdutoController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/LojaProximaResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/LojaProximaResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/ProdutoRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/ProdutoRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/ProdutoResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/dto/ProdutoResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/entity/Produto.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/entity/Produto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/exception/ApiExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/exception/ApiExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/exception/RecursoNaoEncontradoException.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/exception/RecursoNaoEncontradoException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/repository/LojaRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/repository/LojaRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/repository/ProdutoRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/repository/ProdutoRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/service/LojaService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/service/LojaService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/service/ProdutoService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/produtos-go-api/target/classes/br/com/produtosgo/service/ProdutoService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/css/mapa.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/css/mapa.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/demo.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/pages/mapaPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/pages/mapaPage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/services/produtoService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/services/produtoService.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="53" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0152736455221079" />
+      <entry key="MS500" value="2.7394295526897143" />
+      <entry key="S2" value="10.260006947250211" />
+      <entry key="S5" value="20.452782358365177" />
+      <entry key="S10" value="28.886103633498358" />
+      <entry key="S30" value="37.910021923393636" />
+      <entry key="S60" value="40.7971132761171" />
+      <entry key="M2" value="42.36907010133972" />
+      <entry key="M5" value="46.92519710100496" />
+      <entry key="M10" value="72.92380803452073" />
+      <entry key="M15" value="107.97807097679463" />
+      <entry key="M30" value="196.63886670704264" />
+      <entry key="H1" value="289.15097295856043" />
+      <entry key="H2" value="360.260794250744" />
+      <entry key="H4" value="419.8754441296064" />
+      <entry key="D1" value="710.6180446816227" />
+      <entry key="W1" value="1041.3376288079442" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9874373876351017" />
+      <entry key="MS500" value="2.722824840794602" />
+      <entry key="S2" value="10.242709933494192" />
+      <entry key="S5" value="20.43850340179734" />
+      <entry key="S10" value="28.87589478097817" />
+      <entry key="S30" value="37.90552020834884" />
+      <entry key="S60" value="40.794686344255275" />
+      <entry key="M2" value="42.36780865233766" />
+      <entry key="M5" value="46.924633430521915" />
+      <entry key="M10" value="72.9233447020394" />
+      <entry key="M15" value="107.97758831263654" />
+      <entry key="M30" value="196.63839248115562" />
+      <entry key="H1" value="289.15060900681874" />
+      <entry key="H2" value="360.2605607056617" />
+      <entry key="H4" value="419.8752987621138" />
+      <entry key="D1" value="710.6179917192994" />
+      <entry key="W1" value="1041.337617004416" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3LsEieNMnlXtdBGTxLOpabzzzR4" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ProdutosGoApplication.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "integracao-banco",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-63390994e64e-intellij.indexing.shared.core-IU-262.8665.337" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.8665.337" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2ba3846e-3e9c-4526-bd6f-bb7a63185217" name="Changes" comment="" />
+      <created>1794234506459</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1794234506459</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="NONE" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/produtos-go-api/src/main/java/br/com/produtosgo/ProdutosGoApplication.java</url>
+          <line>8</line>
+          <placement>INTER_LINE</placement>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
