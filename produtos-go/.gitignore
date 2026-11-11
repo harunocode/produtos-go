@@ -1,0 +1,24 @@
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Build Java/Maven e Gradle
+**/target/
+**/build/
+**/.gradle/
+*.class
+
+# IDE IntelliJ
+.idea/
+*.iml
+
+# Frontend e ferramentas Node
+node_modules/
+dist/
+coverage/
+
+# Logs e arquivos do sistema operacional
+*.log
+.DS_Store
+Thumbs.db

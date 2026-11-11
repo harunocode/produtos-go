@@ -106,6 +106,12 @@
         </div>
         <div class="mapa-acoes">
           <button class="btn" id="btnLocalizacao" type="button">Usar minha localização</button>
+          <span class="mapa-ou" aria-hidden="true">ou</span>
+          <form id="formBuscaCep" class="busca-cep">
+            <label for="cepLocalizacao">Buscar por CEP</label>
+            <input id="cepLocalizacao" name="cep" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" aria-describedby="statusLocalizacao" required>
+            <button class="btn ghost" id="btnBuscarCep" type="submit">Buscar CEP</button>
+          </form>
           <span id="statusLocalizacao" class="status-localizacao" role="status" aria-live="polite">
             Permita o acesso à localização para encontrar lojas próximas.
           </span>

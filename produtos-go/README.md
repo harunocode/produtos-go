@@ -20,7 +20,7 @@ PostgreSQL + PostGIS: GEOGRAPHY(POINT, 4326)
 ### Front-end
 - `frontend/index.html`: estrutura das telas.
 - `frontend/css/`: estilos gerais e `mapa.css`.
-- `frontend/js/demo.js`: demonstração original, ainda baseada em dados simulados (inclui horários fictícios das lojas).
+- `frontend/js/demo.js`: renderiza a busca e os detalhes dos produtos recebidos da API; autenticação e painel da loja continuam demonstrativos.
 - `frontend/js/busca.js`: busca tolerante a erros de digitação (usada pelas sugestões e pelo filtro de produtos).
 - `frontend/js/horarios.js`: calcula se a loja está aberta ou fechada, monta o texto ("Aberto · fecha às 18h") e a lista da semana.
 - `frontend/js/config/mapaConfig.js`: URL e parâmetros do mapa.
@@ -53,6 +53,10 @@ A resposta contém `id`, `nome`, `categoria`, `latitude`, `longitude`, `distanci
 - `horarioHoje`: ex.: `8h–12h e 13h30–18h` (`Fechado` se não abre hoje; `null` se a loja não tem horários cadastrados);
 - `horarios`: lista de intervalos (`diaSemana` de 1 = segunda a 7 = domingo, `abre`, `fecha` em `HH:mm`).
 
+`GET /api/produtos/proximos?latitude=...&longitude=...&raioMetros=3000&categoria=Ferragem`
+
+Retorna os produtos ativos e com estoque das lojas ativas dentro do raio, junto com os dados e horários da loja. A tela chama os dois endpoints quando o usuário compartilha a localização; a busca por texto, faixa de preço e sugestões filtra os produtos recebidos.
+
 ## Fluxo da busca
 1. O usuário clica em “Usar minha localização”.
 2. O navegador pede permissão.
@@ -63,9 +67,8 @@ A resposta contém `id`, `nome`, `categoria`, `latitude`, `longitude`, `distanci
 
 ## Preparação e execução
 1. Crie o banco PostgreSQL `produtos_go`.
-2. Execute `backend/produtos-go-api/database/01_postgis_lojas.sql` e depois `02_horarios_lojas.sql` (a API consulta `lojas_horarios`; sem essa tabela a busca retorna erro).
-3. Cadastre lojas com coordenadas reais. Em `ST_MakePoint`, informe longitude antes da latitude.
-   Lojas cadastradas depois podem receber horários rodando o `02_horarios_lojas.sql` novamente.
+2. No Supabase, aplique o esquema final de categorias, lojas, horários, produtos e avaliações. Os arquivos `database/01_postgis_lojas.sql` e `02_horarios_lojas.sql` ainda são o esquema legado e não criam as tabelas novas de produtos/categorias.
+3. Cadastre categorias, lojas, horários e produtos. Em `ST_MakePoint`, informe longitude antes da latitude.
 4. Configure `DB_USER` e `DB_PASSWORD`, se necessário.
 5. Execute o back-end com `mvn spring-boot:run` na pasta `backend/produtos-go-api`.
 6. Abra o front-end por servidor local (por exemplo, Live Server).
@@ -73,13 +76,13 @@ A resposta contém `id`, `nome`, `categoria`, `latitude`, `longitude`, `distanci
 A Geolocation API exige contexto seguro: `localhost` ou HTTPS. Não conte com geolocalização ao abrir o arquivo por `file://`.
 
 ## Limitações atuais
-- O mapa Leaflet já consulta o endpoint espacial, mas o catálogo e as telas originais ainda mantêm a lista simulada `SHOPS`. A migração completa das telas para os serviços REST é uma etapa seguinte.
+- O catálogo consulta a API de produtos próximos e o mapa consulta as lojas próximas. Favoritos e curtidas ficam apenas na sessão do navegador.
 - A localização do visitante é usada na consulta e não é gravada no banco por este código.
 - Não foram inventadas lojas de exemplo. A API retorna lista vazia até existirem lojas cadastradas.
 - O CSS original não estava no arquivo recebido; `frontend/css/style.css` permanece como placeholder.
 - Os tiles usados são do OpenStreetMap. Em produção, observe a política de uso dos tiles ou utilize um provedor adequado.
-- O CRUD de produtos existente foi mantido.
-- Os horários são fictícios: o `02_horarios_lojas.sql` aplica um padrão por categoria e as lojas da demonstração (`SHOPS`) têm horários definidos em `demo.js`. Ainda não há tela para a loja editar seus horários.
+- O CRUD REST de produtos existe; o painel da loja ainda não usa esse CRUD e o login continua sendo demonstração.
+- A busca usa os horários cadastrados no banco. Ainda não há tela para a loja editar seus horários.
 - Horários que viram a madrugada (ex.: 18h–2h) e feriados não são tratados.
 - O selo aberto/fechado dos cards é recalculado a cada minuto; no mapa, o status vem da API no momento da busca.
 
@@ -91,7 +94,7 @@ Ao digitar no campo de busca, uma lista de produtos aparece abaixo com os nomes 
 - Tolera erros de digitação em palavras com **5 letras ou mais**: 1 erro em palavras de 5 a 7 letras e até 2 em palavras de 8 ou mais. Conta letra errada, faltando, sobrando ou duas letras trocadas de lugar (`cahve` → Chave de fenda). Palavras menores exigem o início correto (`cahv` não encontra nada).
 - As sugestões respeitam os filtros ativos (categoria, raio e faixa de preço) e mostram quantas lojas têm o produto e o menor preço.
 - Teclado: ↓ e ↑ navegam, Enter escolhe, Esc fecha. Clicar numa sugestão preenche o campo e filtra os resultados.
-- A busca roda em `SHOPS` (dados da demonstração). Quando os produtos vierem da API, o ideal é levar a busca tolerante para o banco (por exemplo, a extensão `pg_trgm` do PostgreSQL).
+- A busca tolerante e as sugestões rodam no navegador sobre os produtos próximos que a API carregou; uma busca global pode ser movida para o PostgreSQL com `pg_trgm`.
 
 ## Validações do cadastro (front-end)
 Aplicadas em `demo.js` ao criar conta, nesta ordem:
@@ -114,7 +117,7 @@ O login continua exigindo apenas e-mail válido e senha de 6+ caracteres. Estas 
 
 ## Próximas etapas
 1. Criar cadastro de lojas com endereço e coordenadas reais.
-2. Migrar os produtos simulados para a API.
-3. Integrar os filtros de categoria com a consulta geográfica.
-4. Implementar autenticação e permissões.
+2. Integrar o painel de cadastro da loja ao CRUD REST de produtos.
+3. Implementar autenticação e validação de propriedade da loja.
+4. Criar telas para cadastrar categorias, lojas e horários.
 5. Criar testes para raio, categoria e ordenação por distância.
