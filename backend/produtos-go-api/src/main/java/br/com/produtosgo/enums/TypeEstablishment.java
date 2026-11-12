@@ -1,4 +1,4 @@
-package com.produtosGo.enums;
+package br.com.produtosgo.enums;
 
 public enum TypeEstablishment {
 }

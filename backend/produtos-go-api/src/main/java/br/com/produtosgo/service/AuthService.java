@@ -1,23 +1,23 @@
-package com.produtosGo.services;
+package br.com.produtosgo.service;
 
-import com.produtosGo.dto.auth.LoginRequestDto;
-import com.produtosGo.dto.auth.LoginResponseDto;
-import com.produtosGo.dto.auth.RegisterRequestDto;
-import com.produtosGo.entities.Users;
-import com.produtosGo.enums.UserType;
-import com.produtosGo.repository.UsersRepository;
+import br.com.produtosgo.dto.auth.LoginRequestDto;
+import br.com.produtosgo.dto.auth.LoginResponseDto;
+import br.com.produtosgo.dto.auth.RegisterRequestDto;
+import br.com.produtosgo.entity.Users;
+import br.com.produtosgo.enums.UserType;
+import br.com.produtosgo.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +30,7 @@ public class AuthService {
     private static final String TOKEN_TYPE = "Bearer";
 
     private final UsersRepository usersRepository;
-    private final PasswordEncoder passwordEncoder;
+
     private final JwtService jwtService;
     private final Clock clock;
 
@@ -50,11 +50,8 @@ public class AuthService {
 
         user.setName(dto.name().trim());
         user.setEmail(normalizedEmail);
-        user.setPassword_hash(
-                passwordEncoder.encode(dto.password_hash())
-        );
+        user.setPassword(dto.password());
         user.setType(dto.type());
-        user.setActive(true);
         user.setCreated_at(
                 Timestamp.from(Instant.now(clock))
         );
@@ -67,7 +64,7 @@ public class AuthService {
         );
 
         return buildResponse(
-                savedUser.getId().toString(),
+                savedUser.getId(),
                 savedUser.getEmail(),
                 savedUser.getType()
         );
@@ -78,22 +75,18 @@ public class AuthService {
         Users user = usersRepository.findByEmail(normalizedEmail)
                 .orElseThrow(AuthService::invalidCredentials);
 
-        checkPassword(dto.password(), user.getPassword_hash());
+        checkPassword(dto.password(), user.getPassword());
 
-        if (!user.isActive()) {
-            throw invalidCredentials();
-        }
-
-        return buildResponse(user.getId().toString(), user.getEmail(), user.getType());
+        return buildResponse(user.getId(), user.getEmail(), user.getType());
     }
 
-    private void checkPassword(String rawPassword, String encodedPassword) {
-        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+    private void checkPassword(String rawPassword, String storedPassword) {
+        if (rawPassword == null || !rawPassword.equals(storedPassword)) {
             throw invalidCredentials();
         }
     }
 
-    private LoginResponseDto buildResponse(String id, String email, UserType type) {
+    private LoginResponseDto buildResponse(Long id, String email, UserType type) {
         String token = jwtService.generateToken(id, email, String.valueOf(type));
         return new LoginResponseDto(token, TOKEN_TYPE, id, email, type);
     }
@@ -111,7 +104,7 @@ public class AuthService {
             throw new IllegalArgumentException("E-mail é obrigatório");
         }
 
-        if (dto.password_hash() == null || dto.password_hash().length() < 8) {
+        if (dto.password() == null || dto.password().length() < 8) {
             throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres");
         }
 
@@ -120,7 +113,7 @@ public class AuthService {
         }
     }
 
-    private static BadCredentialsException invalidCredentials() {
-        return new BadCredentialsException("E-mail ou senha inválidos");
+    private static ResponseStatusException invalidCredentials() {
+        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos");
     }
 }

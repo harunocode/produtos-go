@@ -1,4 +1,4 @@
-package com.produtosGo.services;
+package br.com.produtosgo.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -34,7 +34,7 @@ public class JwtService {
     }
 
     public String generateToken(
-            String id,
+            Long id,
             String email,
             String role) {
 

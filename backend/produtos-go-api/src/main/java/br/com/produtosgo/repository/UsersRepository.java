@@ -1,14 +1,13 @@
-package com.produtosGo.repository;
+package br.com.produtosgo.repository;
 
-import com.produtosGo.entities.Users;
+import br.com.produtosgo.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface UsersRepository extends JpaRepository<Users, UUID> {
+public interface UsersRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
     boolean existsByEmail(String email);
 }

@@ -1,7 +1,7 @@
-package com.produtosGo.security;
+package br.com.produtosgo.security;
 
-import com.produtosGo.enums.UserType;
-import com.produtosGo.services.JwtService;
+import br.com.produtosgo.enums.UserType;
+import br.com.produtosgo.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 
@@ -29,7 +29,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/auth/");
+        String path = request.getServletPath();
+
+        return path.startsWith("/auth/")
+                || path.startsWith("/api/auth/");
     }
 
     @Override

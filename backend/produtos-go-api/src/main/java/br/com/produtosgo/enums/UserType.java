@@ -1,7 +1,7 @@
-package com.produtosGo.enums;
+package br.com.produtosgo.enums;
 
 public enum UserType {
-    COSTUMER,
-    ESTABLISHMENT,
+    CLIENTE,
+    ESTABELECIMENTO,
     ADMIN
 }

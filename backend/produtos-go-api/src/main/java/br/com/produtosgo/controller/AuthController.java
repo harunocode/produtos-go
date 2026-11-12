@@ -1,14 +1,13 @@
-package com.produtosGo.controller;
+package br.com.produtosgo.controller;
 
-import com.produtosGo.dto.auth.LoginRequestDto;
-import com.produtosGo.dto.auth.LoginResponseDto;
-import com.produtosGo.dto.auth.RegisterRequestDto;
-import com.produtosGo.services.AuthService;
+import br.com.produtosgo.dto.auth.LoginRequestDto;
+import br.com.produtosgo.dto.auth.LoginResponseDto;
+import br.com.produtosgo.dto.auth.RegisterRequestDto;
+import br.com.produtosgo.service.AuthService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

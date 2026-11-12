@@ -1,11 +1,11 @@
-package com.produtosGo.dto.auth;
+package br.com.produtosgo.dto.auth;
 
-import com.produtosGo.enums.UserType;
+import br.com.produtosgo.enums.UserType;
 
 public record LoginResponseDto(
         String token,
         String tokenType,
-        String userId,
+        Long userId,
         String email,
         UserType type
 ) {}
