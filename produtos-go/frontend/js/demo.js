@@ -1,16 +1,8 @@
 /*
  * Produtos GO — demonstração original organizada.
  *
- * ATENÇÃO:
- * Este arquivo mantém os dados simulados e a lógica original para que a
- * demonstração continue funcionando sem back-end. Não é a integração REST.
- * A migração deve substituir os dados SHOPS/favs/saved e os handlers de
- * autenticação/produtos por chamadas aos serviços em ../services/.
- *
- * Módulos futuros:
- *   services/produtoService.js
- *   services/lojaService.js
- *   services/authService.js
+ * Os produtos da busca são preenchidos pela API em mapaPage.js.
+ * Login, painel da loja, favoritos e curtidas continuam locais/demonstrativos.
  */
 var CATS=[
   ["todos","Todos","🗺️"],
@@ -28,19 +20,56 @@ var CATS=[
 ];
 
 
-var SHOPS=[
+var SHOPS=[];
+var produtosCarregados=false,produtosCarregando=false,erroProdutos="";
 
-{n:"Ferragem do seu Zé",c:"ferragem",h:Horarios.montar({semana:[["08:00","12:00"],["13:30","18:00"]],sabado:[["08:00","12:00"]],domingo:[]}),km:2,r:3,x:36,y:40,i:[["Chave de fenda",19.9,"🪛"],["Martelo",39.9,"🔨"],["Furadeira",189,"🔧"]]},
+function categoriaDoBanco(nome){
+  var normal=Busca.normalizar(nome).replace(/\s/g,"");
+  var encontrada=CATS.find(function(c){return Busca.normalizar(c[0]).replace(/\s/g,"")===normal||Busca.normalizar(c[1]).replace(/\s/g,"")===normal});
+  return encontrada?encontrada[0]:"todos";
+}
 
-{n:"Casa do Parafuso",c:"ferragem",h:Horarios.montar({semana:[["08:00","18:00"]],sabado:[["08:00","13:00"]],domingo:[]}),km:1,r:4,x:62,y:62,i:[["Chave de fenda",24.5,"🪛"],["Alicate",29.9,"🔧"]]},
+function horariosDoBanco(loja){
+  var semana=[[],[],[],[],[],[],[]];
+  (loja.horarios||[]).forEach(function(h){
+    var dia=Number(h.diaSemana)%7;
+    semana[dia].push([String(h.abre).slice(0,5),String(h.fecha).slice(0,5)]);
+  });
+  semana.forEach(function(intervalos){intervalos.sort(function(a,b){return a[0].localeCompare(b[0])})});
+  return semana;
+}
 
-{n:"Padaria Sabor do Trigo",c:"padaria",h:Horarios.montar({semana:[["06:00","20:00"]],sabado:[["06:00","20:00"]],domingo:[["06:00","12:00"]]}),km:1.5,r:5,x:60,y:24,i:[["Pão francês (kg)",16.9,"🥖"],["Bolo de milho",18,"🍰"]]},
+window.iniciarCarregamentoProdutos=function(){
+  produtosCarregando=true;erroProdutos="";
+  if(!produtosCarregados)render();
+};
 
-{n:"Mercado Estrela",c:"mercado",h:Horarios.montar({semana:[["07:30","22:00"]],sabado:[["07:30","22:00"]],domingo:[["08:00","20:00"]]}),km:3,r:4,x:22,y:72,i:[["Arroz 5 kg",27.9,"🍚"],["Leite 1 L",5.49,"🥛"]]},
+window.definirProdutosDoBanco=function(linhas){
+  var porLoja=new Map();
+  (linhas||[]).forEach(function(p){
+    var l=p.loja;
+    if(!l||l.id==null)return;
+    var s=porLoja.get(l.id);
+    if(!s){
+      var c=categoriaDoBanco(l.categoria);
+      s={id:l.id,n:l.nome,c:c,h:horariosDoBanco(l),km:Number(l.distanciaMetros||0)/1000,r:0,
+        x:50,y:50,latitude:l.latitude,longitude:l.longitude,i:[]};
+      porLoja.set(l.id,s);
+    }
+    var emoji=(CATS.find(function(item){return item[0]===s.c})||CATS[0])[2];
+    s.i.push([p.nome,Number(p.preco),emoji,p.id]);
+  });
+  SHOPS=Array.from(porLoja.values());
+  produtosCarregados=true;produtosCarregando=false;erroProdutos="";
+  render();
+  atualizarSugestoes();
+};
 
-{n:"Bazar Alegria",c:"bazar",h:Horarios.montar({semana:[["09:00","18:30"]],sabado:[["09:00","14:00"]],domingo:[]}),km:2.5,r:3,x:80,y:36,i:[["Jogo de copos",34.9,"🥤"],["Vassoura",22,"🧹"]]},
-
-{n:"Papelaria Ponto",c:"papelaria",h:Horarios.montar({semana:[["08:30","19:00"]],sabado:[["09:00","13:00"]],domingo:[]}),km:4,r:4,x:78,y:78,i:[["Caderno 96 folhas",16.9,"📓"],["Caneta (cx 12)",21,"🖊️"]]}];
+window.erroProdutosDoBanco=function(mensagem){
+  produtosCarregando=false;
+  erroProdutos="Não foi possível carregar produtos do banco: "+String(mensagem||"erro de conexão");
+  if(!produtosCarregados)render();
+};
 
 var cat="todos",tiers={1:false,2:false,3:false},cur=null,hi=-1;
 
@@ -72,7 +101,8 @@ function art(it){
 
 var cats=$("cats");
 
-CATS.forEach(function(c){var b=document.createElement("button");b.className="chip";b.textContent=c[2]+" "+c[1];b.setAttribute("aria-pressed",c[0]==="todos");b.onclick=function(){cat=c[0];[].forEach.call(cats.children,function(x,j){x.setAttribute("aria-pressed",CATS[j][0]===cat)});render()};cats.appendChild(b)});
+window.produtosGoCategoriaAtual=cat;
+CATS.forEach(function(c){var b=document.createElement("button");b.className="chip";b.textContent=c[2]+" "+c[1];b.setAttribute("aria-pressed",c[0]==="todos");b.onclick=function(){cat=c[0];window.produtosGoCategoriaAtual=cat;[].forEach.call(cats.children,function(x,j){x.setAttribute("aria-pressed",CATS[j][0]===cat)});render();window.atualizarBuscaGeografica&&window.atualizarBuscaGeografica()};cats.appendChild(b)});
 
 var prices=$("prices");
 
@@ -102,6 +132,11 @@ function render(){
 
   var g=$("grid");g.innerHTML="";var shown={};
 
+  if(!produtosCarregados){
+    g.innerHTML='<div class="empty">'+esc(produtosCarregando?'Carregando produtos do banco...':(erroProdutos||'Use sua localização para buscar produtos próximos.'))+'</div>';
+    return;
+  }
+
   var res=[];
 
   SHOPS.forEach(function(s,si){
@@ -124,9 +159,9 @@ function render(){
 
   if(!res.length){g.innerHTML='<div class="empty">Nenhum produto encontrado. Aumente o raio, troque a categoria ou limpe a busca.</div>';return}
 
-  res.forEach(function(r){var s=SHOPS[r[0]];g.appendChild(card(s,s.i[r[1]],r[0],r[1]));
+    res.forEach(function(r){var s=SHOPS[r[0]];g.appendChild(card(s,s.i[r[1]],r[0],r[1]));
 
-    if(!shown[r[0]]){shown[r[0]]=1;var p=document.createElement("button");p.className="pin";p.style.left=s.x+"%";p.style.top=s.y+"%";p.textContent=CATS.filter(function(c){return c[0]===s.c})[0][2];p.setAttribute("aria-label",s.n);p.dataset.s=r[0];
+    if(!shown[r[0]]){shown[r[0]]=1;var p=document.createElement("button");p.className="pin";p.style.left=s.x+"%";p.style.top=s.y+"%";var categoriaVisual=CATS.filter(function(c){return c[0]===s.c})[0]||CATS[0];p.textContent=categoriaVisual[2];p.setAttribute("aria-label",s.n);p.dataset.s=r[0];
 
       p.onclick=function(){mark(r[0],true)};$("map").appendChild(p)}});
 
@@ -148,13 +183,14 @@ function open(si,ii){
 
   var hs=Horarios.status(s.h);$("dHorario").innerHTML=hSel(si)+(hs.hoje?'<small class="hor-hoje">Hoje: '+esc(hs.hoje)+'</small>':'')+Horarios.semanaHtml(s.h);
 
-  $("dStars").textContent=stars(s.r);$("dStars").setAttribute("aria-label",s.r+" de 5 estrelas");
+  $("dStars").textContent=s.r?stars(s.r):"Sem avaliações";$("dStars").setAttribute("aria-label",s.r?s.r+" de 5 estrelas":"Sem avaliações");
 
   $("dDist").textContent="Distância "+String(s.km).replace(".",",")+" km 📍";
 
   $("dName").textContent=it[0];$("dPrice").textContent=money(it[1]);
 
-  $("route").href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(s.n+" Canoas RS");
+  var destino=s.latitude!=null&&s.longitude!=null?s.latitude+","+s.longitude:s.n+" Canoas RS";
+  $("route").href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(destino);
 
   $("sv").setAttribute("aria-pressed","false");$("fv").setAttribute("aria-pressed","false");$("fv").textContent="🤍 Favoritar";$("toast").textContent="";
 
@@ -174,7 +210,7 @@ $("sv").onclick=function(){var on=$("sv").getAttribute("aria-pressed")!=="true";
 
 $("fv").onclick=function(){var on=$("fv").getAttribute("aria-pressed")!=="true";$("fv").setAttribute("aria-pressed",on);$("fv").textContent=on?"❤️ Favoritado":"🤍 Favoritar";$("toast").textContent=on?"Loja adicionada aos favoritos.":"Loja removida dos favoritos."};
 
-$("q").oninput=function(){render();atualizarSugestoes()};$("r").oninput=render;$("go").onclick=function(){showBusca();render()};
+$("q").oninput=function(){render();atualizarSugestoes()};$("r").oninput=render;$("go").onclick=function(){showBusca();render();window.atualizarBuscaGeografica&&window.atualizarBuscaGeografica()};
 
 var user=null,loja=null,demoLoja=null,favs={},saved={},lastTab='busca',mode='in',tp='CLIENTE';
 
@@ -184,17 +220,19 @@ function hideAll(){['vLogin','vBusca','vProd','vLista','vLoja','bar'].forEach(fu
 
 function drawTabs(){var t=$('tabsEl');t.innerHTML='';if(!user||user.tipo!=='CLIENTE')return;[['busca','Buscar'],['fav','Favoritos'],['sav','Curtidos']].forEach(function(x){var b=document.createElement('button');b.className='tab';b.textContent=x[1];b.setAttribute('aria-selected',x[0]===lastTab);b.onclick=function(){goTab(x[0])};t.appendChild(b)})}
 
+function lojaKey(si){return SHOPS[si].id!=null?String(SHOPS[si].id):String(si)}
+
 function goTab(t){lastTab=t;hideAll();drawTabs();if(t==='busca'){$('vBusca').hidden=false;$('bar').hidden=false;return}
 
  var g=$('lG'),n=0;g.innerHTML='';$('vLista').hidden=false;
 
- if(t==='fav'){$('lT').textContent='Suas lojas favoritas';SHOPS.forEach(function(s,si){if(favs[si])s.i.forEach(function(it,ii){g.appendChild(card(s,it,si,ii));n++})})}
+ if(t==='fav'){$('lT').textContent='Suas lojas favoritas';SHOPS.forEach(function(s,si){if(favs[lojaKey(si)])s.i.forEach(function(it,ii){g.appendChild(card(s,it,si,ii));n++})})}
 
- else{$('lT').textContent='Produtos curtidos';Object.keys(saved).forEach(function(k){if(!saved[k])return;var si=+k.split('|')[0],nm=k.slice(k.indexOf('|')+1),s=SHOPS[si],ii=s?s.i.findIndex(function(it){return it[0]===nm}):-1;if(ii>-1){g.appendChild(card(s,s.i[ii],si,ii));n++}})}
+ else{$('lT').textContent='Produtos curtidos';SHOPS.forEach(function(s,si){s.i.forEach(function(it,ii){if(saved[it[3]!=null?String(it[3]):si+'|'+it[0]]){g.appendChild(card(s,it,si,ii));n++}})})}
 
  if(!n)g.innerHTML='<div class=empty>'+(t==='fav'?'Você ainda não favoritou nenhuma loja. Abra um produto e toque em Favoritar.':'Nada curtido ainda. Abra um produto e arraste para a direita.')+'</div>'}
 
-function mkDemo(){if(!demoLoja)demoLoja={nome:SHOPS[0].n,status:'ATIVO',si:0,meus:SHOPS[0].i.map(function(it){return{n:it[0],p:it[1],e:it[2],est:8,on:true}})};return demoLoja}
+function mkDemo(){if(!demoLoja)demoLoja={nome:'Minha loja',status:'ATIVO',si:null,meus:[]};return demoLoja}
 
 function syncLoja(){if(loja.si!==null)SHOPS[loja.si].i=loja.meus.filter(function(p){return p.on&&p.est>0}).map(function(p){return[p.n,p.p,p.e]});renderLoja()}
 
@@ -210,7 +248,7 @@ function renderLoja(){hideAll();$('vLoja').hidden=false;$('lojaT').textContent='
 
   b[0].onclick=function(){if(p.est>0){p.est--;syncLoja()}};b[1].onclick=function(){p.est++;syncLoja()};b[2].onclick=function(){p.on=!p.on;syncLoja()};tb.appendChild(tr)});
 
- var R=loja.si===0?[[3,'Atendimento bom, mas a entrega demorou.'],[4,'Preço justo e loja organizada.'],[2,'Faltou a chave de fenda média.']]:[];
+ var R=[];
 
  var avg=R.length?R.reduce(function(a,r){return a+r[0]},0)/R.length:0;
 
@@ -276,15 +314,15 @@ $('pa').onclick=function(){var n=$('pn').value.trim(),p=parseFloat($('pp').value
 
  loja.meus.push({n:n,p:p,e:'📦',est:e,on:true});$('pn').value='';$('pp').value='';$('pe').value=1;x.textContent='';syncLoja()};
 
-function fkey(){return cur[0]+'|'+SHOPS[cur[0]].i[cur[1]][0]}
+function fkey(){var it=SHOPS[cur[0]].i[cur[1]];return it[3]!=null?String(it[3]):cur[0]+'|'+it[0]}
 
-function refFav(){var f=!!favs[cur[0]],v=!!saved[fkey()];$('fv').setAttribute('aria-pressed',f);$('fv').textContent=f?'❤️ Favoritado':'🤍 Favoritar';$('sv').setAttribute('aria-pressed',v)}
+function refFav(){var f=!!favs[lojaKey(cur[0])],v=!!saved[fkey()];$('fv').setAttribute('aria-pressed',f);$('fv').textContent=f?'❤️ Favoritado':'🤍 Favoritar';$('sv').setAttribute('aria-pressed',v)}
 
 var _o=open;open=function(si,ii){_o(si,ii);$('vLista').hidden=true;refFav()};
 
 $('sv').onclick=function(){var k=fkey();saved[k]=!saved[k];refFav();$('toast').textContent=saved[k]?'Produto salvo na sua lista.':'Produto removido da lista.'};
 
-$('fv').onclick=function(){favs[cur[0]]=!favs[cur[0]];refFav();$('toast').textContent=favs[cur[0]]?'Loja adicionada aos favoritos.':'Loja removida dos favoritos.'};
+$('fv').onclick=function(){var k=lojaKey(cur[0]);favs[k]=!favs[k];refFav();$('toast').textContent=favs[k]?'Loja adicionada aos favoritos.':'Loja removida dos favoritos.'};
 
 $('catSel').innerHTML=CATS.slice(1).map(function(c){return'<option>'+c[1]+'</option>'}).join('');fields();
 
@@ -298,7 +336,7 @@ var _o3=open;open=function(si,ii){_o3(si,ii);var s=SHOPS[si],it=s.i[ii];
 
  keep=false;$('detail').hidden=false;$('dEnd').hidden=true;
 
- $('cNm').textContent=it[0];$('cPr').textContent=money(it[1]);$('cShop').textContent=s.n;$('cMeta').textContent=String(s.km).replace('.',',')+' km · '+stars(s.r)};
+ $('cNm').textContent=it[0];$('cPr').textContent=money(it[1]);$('cShop').textContent=s.n;$('cMeta').textContent=String(s.km).replace('.',',')+' km · '+(s.r?stars(s.r):'Sem avaliações')};
 
 function nextCard(){var i=deck.findIndex(function(r){return r[0]===cur[0]&&r[1]===cur[1]});
 

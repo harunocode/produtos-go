@@ -10,20 +10,28 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 120)
+    @Column(name = "nome", nullable = false, length = 200)
     private String nome;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "preco", nullable = false, precision = 12, scale = 2)
     private BigDecimal preco;
 
-    @Column(nullable = false)
+    @Column(name = "estoque", nullable = false)
     private Integer estoque;
 
-    @Column(length = 500)
+    @Column(name = "descricao", length = 500)
     private String descricao;
 
-    @Column(nullable = false)
+    @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "loja_id", nullable = false)
+    private Loja loja;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
 
     public Produto() {}
 
@@ -39,4 +47,8 @@ public class Produto {
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public Loja getLoja() { return loja; }
+    public void setLoja(Loja loja) { this.loja = loja; }
+    public Categoria getCategoria() { return categoria; }
+    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
 }
