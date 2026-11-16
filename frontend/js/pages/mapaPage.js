@@ -1,9 +1,14 @@
 import { MAPA_CONFIG } from "../config/mapaConfig.js";
 import { obterLocalizacaoAtual } from "../services/geolocalizacaoService.js";
+import { obterLocalizacaoPorCep } from "../services/cepService.js";
 import { buscarLojasProximas } from "../services/lojaService.js";
+import { produtoService } from "../services/produtoService.js";
 
 const elementoMapa = document.getElementById("mapaLeaflet");
 const botaoLocalizacao = document.getElementById("btnLocalizacao");
+const formularioCep = document.getElementById("formBuscaCep");
+const campoCep = document.getElementById("cepLocalizacao");
+const botaoBuscarCep = document.getElementById("btnBuscarCep");
 const status = document.getElementById("statusLocalizacao");
 const seletorRaio = document.getElementById("r");
 
@@ -12,6 +17,8 @@ let camadaLojas;
 let marcadorUsuario;
 let circuloRaio;
 let posicaoUsuario;
+let cepDaBusca;
+let numeroBusca = 0;
 
 function informar(mensagem) {
   if (status) status.textContent = mensagem;
@@ -33,6 +40,13 @@ function escaparHtml(valor) {
   })[c]);
 }
 
+function categoriaParaApi() {
+  const categoriaAtual = window.produtosGoCategoriaAtual || "todos";
+  if (categoriaAtual === "todos") return null;
+  const categoria = window.CATS?.find(([codigo]) => codigo === categoriaAtual);
+  return categoria ? categoria[1] : categoriaAtual;
+}
+
 function desenharUsuario(raioKm) {
   const ponto = [posicaoUsuario.latitude, posicaoUsuario.longitude];
   if (marcadorUsuario) mapa.removeLayer(marcadorUsuario);
@@ -45,6 +59,7 @@ function desenharUsuario(raioKm) {
 }
 
 function desenharLojas(lojas) {
+  if (!camadaLojas) return;
   camadaLojas.clearLayers();
   lojas.forEach(loja => {
     if (typeof loja.latitude !== "number" || typeof loja.longitude !== "number") return;
@@ -61,21 +76,43 @@ function desenharLojas(lojas) {
 }
 
 async function atualizarBusca() {
-  if (!posicaoUsuario || !mapa) return;
+  if (!posicaoUsuario) return;
+  const buscaId = ++numeroBusca;
   const raioKm = Number(seletorRaio?.value || MAPA_CONFIG.raioPadraoKm);
-  informar("Buscando lojas próximas...");
-  desenharUsuario(raioKm);
-  try {
-    const lojas = await buscarLojasProximas({
+  const categoria = categoriaParaApi();
+  informar("Buscando lojas e produtos próximos...");
+  window.iniciarCarregamentoProdutos?.();
+  if (mapa) desenharUsuario(raioKm);
+  const [resultadoLojas, resultadoProdutos] = await Promise.allSettled([
+    buscarLojasProximas({ ...posicaoUsuario, raioKm, categoria }),
+    produtoService.buscarProximos({
       ...posicaoUsuario,
-      raioKm,
-      categoria: window.produtosGoCategoriaAtual || "todos"
-    });
-    desenharLojas(lojas);
-    informar(`${lojas.length} loja(s) encontrada(s) em um raio de ${raioKm} km.`);
-  } catch (erro) {
-    informar(`Não foi possível consultar a API: ${erro.message}`);
+      raioMetros: Math.round(raioKm * 1000),
+      categoria
+    })
+  ]);
+  if (buscaId !== numeroBusca) return;
+
+  const mensagens = [];
+  if (resultadoLojas.status === "fulfilled") {
+    desenharLojas(resultadoLojas.value);
+    mensagens.push(`${resultadoLojas.value.length} loja(s)`);
+  } else {
+    mensagens.push("Não foi possível carregar as lojas");
   }
+
+  if (resultadoProdutos.status === "fulfilled") {
+    window.definirProdutosDoBanco?.(resultadoProdutos.value);
+    mensagens.push(`${resultadoProdutos.value.length} produto(s)`);
+  } else {
+    window.erroProdutosDoBanco?.(resultadoProdutos.reason?.message || "Falha ao consultar produtos.");
+    mensagens.push("não foi possível carregar os produtos");
+  }
+
+  const origem = cepDaBusca
+    ? ` a partir da localização aproximada do CEP ${cepDaBusca}`
+    : "";
+  informar(`${mensagens.join("; ")} em um raio de ${raioKm} km${origem}.`);
 }
 
 async function solicitarLocalizacao() {
@@ -84,13 +121,43 @@ async function solicitarLocalizacao() {
     requestAnimationFrame(() => mapa?.invalidateSize());
     informar("Solicitando permissão de localização...");
     posicaoUsuario = await obterLocalizacaoAtual();
+    cepDaBusca = null;
     await atualizarBusca();
   } catch (erro) {
     informar(erro.message);
   }
 }
 
+async function buscarPorCep(evento) {
+  evento.preventDefault();
+  if (!campoCep || !botaoBuscarCep) return;
+
+  botaoBuscarCep.disabled = true;
+  informar("Consultando o CEP...");
+  try {
+    const localizacao = await obterLocalizacaoPorCep(campoCep.value);
+    posicaoUsuario = localizacao;
+    cepDaBusca = campoCep.value.replace(/\D/g, "").replace(/^(\d{5})(\d{3})$/, "$1-$2");
+    requestAnimationFrame(() => mapa?.invalidateSize());
+    await atualizarBusca();
+  } catch (erro) {
+    informar(erro.message);
+  } finally {
+    botaoBuscarCep.disabled = false;
+  }
+}
+
+function formatarCampoCep() {
+  if (!campoCep) return;
+  const digitos = campoCep.value.replace(/\D/g, "").slice(0, 8);
+  campoCep.value = digitos.length > 5
+    ? `${digitos.slice(0, 5)}-${digitos.slice(5)}`
+    : digitos;
+}
+
 iniciarMapa();
 botaoLocalizacao?.addEventListener("click", solicitarLocalizacao);
+campoCep?.addEventListener("input", formatarCampoCep);
+formularioCep?.addEventListener("submit", buscarPorCep);
 seletorRaio?.addEventListener("change", atualizarBusca);
 window.atualizarBuscaGeografica = atualizarBusca;
