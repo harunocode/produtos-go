@@ -1,15 +1,14 @@
 package br.com.produtosgo.controller;
 
 import br.com.produtosgo.dto.LojaProximaResponse;
+import br.com.produtosgo.dto.LojaRequestDTO;
 import br.com.produtosgo.service.LojaService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/lojas")
@@ -30,4 +29,10 @@ public class LojaController {
     ) {
         return service.buscarProximas(latitude, longitude, raioMetros, categoria);
     }
+
+    @PostMapping
+    public LojaProximaResponse criarNovoLoja(@Valid @RequestBody LojaRequestDTO request){
+        return service.criarLoja(request);
+    }
+
 }
