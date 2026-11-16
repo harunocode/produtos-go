@@ -49,8 +49,13 @@ function desenharLojas(lojas) {
   lojas.forEach(loja => {
     if (typeof loja.latitude !== "number" || typeof loja.longitude !== "number") return;
     const km = Number(loja.distanciaMetros || 0) / 1000;
+    const semHorario = !loja.horarios || loja.horarios.length === 0;
+    const selo = window.Horarios && loja.statusHorario
+      ? `<br>${window.Horarios.badge({ aberto: loja.aberto, neutro: semHorario, texto: loja.statusHorario })}`
+      : "";
+    const hoje = loja.horarioHoje ? `<br><small>Hoje: ${escaparHtml(loja.horarioHoje)}</small>` : "";
     L.marker([loja.latitude, loja.longitude])
-      .bindPopup(`<b>${escaparHtml(loja.nome)}</b>${escaparHtml(loja.categoria || "Loja")}<br><small>${km.toFixed(2).replace(".", ",")} km</small>`)
+      .bindPopup(`<b>${escaparHtml(loja.nome)}</b>${escaparHtml(loja.categoria || "Loja")}<br><small>${km.toFixed(2).replace(".", ",")} km</small>${selo}${hoje}`)
       .addTo(camadaLojas);
   });
 }

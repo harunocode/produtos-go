@@ -22,21 +22,21 @@
 
 <div class="wrap">
 
-  <h1>Produtos GO</h1>
+  <h1>Produtos GO</h1>
 
-  <p class="sub">Ache o produto certo na loja mais perto de você.</p>
+  <p class="sub">Ache o produto certo na loja mais perto de você.</p>
 
-  <div class='top' id='topo' hidden><div class='who'><span id='whoN'></span><span class='badge' id='whoB'></span></div><div class='tabs' id='tabsEl'></div><button class='btn ghost' id='out' style='padding:8px 16px'>Sair</button></div>
+  <div class='top' id='topo' hidden><div class='who'><span id='whoN'></span><span class='badge' id='whoB'></span></div><div class='tabs' id='tabsEl'></div><button class='btn ghost' id='out' style='padding:8px 16px'>Sair</button></div>
 
-  <div class="panel" id="bar" hidden><div class="search">
+  <div class="panel" id="bar" hidden><div class="search">
 
-    <input id="q" type="search" placeholder="O que você procura? Ex.: chave de fenda" aria-label="Buscar produto">
+    <div class="busca-campo"><input id="q" type="search" placeholder="O que você procura? Ex.: chave de fenda" aria-label="Buscar produto" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugestoes"><ul id="sugestoes" class="sugestoes" role="listbox" aria-label="Sugestões de produtos" hidden></ul></div>
 
-    <button class="btn" id="go">Filtrar</button>
+    <button class="btn" id="go">Filtrar</button>
 
-  </div></div>
+  </div></div>
 
-  <section id='vLogin'><div class='panel form'>
+  <section id='vLogin'><div class='panel form'>
 
 <div class='seg'><button class='chip' id='mIn' aria-pressed='true'>Entrar</button><button class='chip' id='mUp' aria-pressed='false'>Criar conta</button></div>
 
@@ -46,7 +46,7 @@
 
 <label id='lLoja' hidden>Nome da loja<input id='lj'></label>
 
-<label id='lDoc' hidden>CPF ou CNPJ<input id='doc' inputmode='numeric'></label>
+<label id='lDoc' hidden>CNPJ<input id='doc' inputmode='numeric' maxlength='18' placeholder='00.000.000/0000-00' autocomplete='off' required aria-required='true'></label>
 
 <label id='lCat' hidden>Categoria da loja<select id='catSel'></select></label>
 
@@ -56,9 +56,13 @@
 
 <label>Senha<input id='pw' type='password' autocomplete='current-password'></label>
 
+<small class='toast' id='hSenha' hidden>A senha deve ter no mínimo 6 caracteres, com pelo menos 1 número e 1 caractere especial (ex.: ! @ # $ %).</small>
+
+<label id='lConf' hidden>Confirmar senha<input id='pw2' type='password' autocomplete='new-password'></label>
+
 <button class='btn' id='enter'>Entrar</button><div class='err' id='erro' role='alert'></div>
 
-<small class='toast'>Demonstração: e-mails que começam com “loja” entram como estabelecimento (ex.: loja@demo.com). Os demais entram como cliente. Senha: 6 caracteres ou mais.</small>
+<small class='toast'>Demonstração: e-mails que começam com “loja” entram como estabelecimento (ex.: loja@demo.com). Os demais entram como cliente. Senha: 6 caracteres ou mais (no cadastro, também 1 número e 1 caractere especial).</small>
 
 </div></section>
 
@@ -74,29 +78,29 @@
 
 <p class='toast' id='lNote'></p></section>
 
-<section id='vLista' hidden><h2 id='lT' style='margin-top:16px'></h2><div class='grid' id='lG'></div></section>
+<section id='vLista' hidden><h2 id='lT' tabindex='-1' style='margin-top:16px'></h2><div class='toast' id='lToast' role='status'></div><div class='grid' id='lG'></div></section>
 
 <section id="vBusca" hidden>
 
-    <div class="layout">
+    <div class="layout">
 
-      <aside class="panel">
+      <aside class="panel">
 
-        <h2>Categorias</h2><div class="cats" id="cats"></div>
+        <h2>Categorias</h2><div class="cats" id="cats"></div>
 
-        <h2>Raio de distância</h2>
+        <h2>Raio de distância</h2>
 
-        <div class="row"><input id="r" type="range" min="1" max="5" step="0.5" value="3" aria-label="Raio em km"><output id="rv">3 km</output></div>
+        <div class="row"><input id="r" type="range" min="1" max="5" step="0.5" value="3" aria-label="Raio em km"><output id="rv">3 km</output></div>
 
-        <h2 style="margin-top:18px">Faixa de preços</h2>
+        <h2 style="margin-top:18px">Faixa de preços</h2>
 
-        <div class="prices" id="prices"></div>
+        <div class="prices" id="prices"></div>
 
-      </aside>
+      </aside>
 
-      <div>
+      <div>
 
-        <div id="mapaLeaflet" class="mapa-leaflet" role="region" aria-label="Mapa das lojas próximas"></div>
+        <div id="mapaLeaflet" class="mapa-leaflet" role="region" aria-label="Mapa das lojas próximas"></div>
         <div id="map" class="map" aria-hidden="true" hidden>
           <svg viewBox="0 0 400 225" aria-hidden="true"><circle id="circ" cx="200" cy="112" r="80"></circle></svg>
         </div>
@@ -106,62 +110,65 @@
             Permita o acesso à localização para encontrar lojas próximas.
           </span>
         </div>
+
+        <div class="grid" id="grid" aria-live="polite"></div>
+
       </div>
 
-        <div class="grid" id="grid" aria-live="polite"></div>
+    </div>
 
-      </div>
+  </section>
 
-    </div>
+  <section id="vProd" hidden>
 
-  </section>
+    <button class="btn ghost" id="back" style="margin-top:16px">Voltar aos resultados</button>
 
-  <section id="vProd" hidden>
+    <div class='panel' id='dEnd' hidden style='text-align:center;margin-top:16px'><h2>Fim da pilha! 🎉</h2><p>Você viu todos os produtos desta busca.</p><button class='btn' id='dBack'>Voltar aos resultados</button></div>
 
-    <button class="btn ghost" id="back" style="margin-top:16px">Voltar aos resultados</button>
+    <div class='snack' id='snack' role='status'></div>
 
-    <div class='panel' id='dEnd' hidden style='text-align:center;margin-top:16px'><h2>Fim da pilha! 🎉</h2><p>Você viu todos os produtos desta busca.</p><button class='btn' id='dBack'>Voltar aos resultados</button></div>
+    <div class="detail" id="detail">
 
-    <div class='snack' id='snack' role='status'></div>
+      <div class="big panel" style="padding:0"><div class='cap'><b id='cNm'></b><span id='cPr'></span></div><div class="art" id="dArt"></div><span class='stamp ok' id='stOk'>CAPTURAR!</span><span class='stamp no' id='stNo'>PASSAR</span><button class="save" id="sv" aria-pressed="false" aria-label="Salvar produto">🔖</button><div class='foot'><span id='cShop'></span><span id='cMeta'></span></div></div>
 
-    <div class="detail" id="detail">
+      <div class="panel">
 
-      <div class="big panel" style="padding:0"><div class='cap'><b id='cNm'></b><span id='cPr'></span></div><div class="art" id="dArt"></div><span class='stamp ok' id='stOk'>CAPTURAR!</span><span class='stamp no' id='stNo'>PASSAR</span><button class="save" id="sv" aria-pressed="false" aria-label="Salvar produto">🔖</button><div class='foot'><span id='cShop'></span><span id='cMeta'></span></div></div>
+        <span class="store" id="dStore"></span>
 
-      <div class="panel">
+        <div class="horario-box" id="dHorario"></div>
 
-        <span class="store" id="dStore"></span>
+        <div class="facts">
 
-        <div class="facts">
+          <div><small>Avaliações</small><br><span class="stars" id="dStars"></span></div>
 
-          <div><small>Avaliações</small><br><span class="stars" id="dStars"></span></div>
+          <div id="dDist"></div>
 
-          <div id="dDist"></div>
+          <div><b id="dName"></b><div class="bigprice" id="dPrice"></div></div>
 
-          <div><b id="dName"></b><div class="bigprice" id="dPrice"></div></div>
+        </div>
 
-        </div>
+        <div class="actions"><button class='rbtn no' id='bNo' aria-label='Passar produto'>✕</button><button class='rbtn ok' id='bOk' aria-label='Curtir produto'>♥</button><small style='flex-basis:100%;color:var(--muted)'>Arraste o card: para a direita curte, para a esquerda passa.</small>
 
-        <div class="actions"><button class='rbtn no' id='bNo' aria-label='Passar produto'>✕</button><button class='rbtn ok' id='bOk' aria-label='Curtir produto'>♥</button><small style='flex-basis:100%;color:var(--muted)'>Arraste o card: para a direita curte, para a esquerda passa.</small>
+          <button class="btn ghost fav" id="fv" aria-pressed="false">🤍 Favoritar</button>
 
-          <button class="btn ghost fav" id="fv" aria-pressed="false">🤍 Favoritar</button>
+          <a class="btn" id="route" target="_blank" rel="noopener">Como chegar</a>
 
-          <a class="btn" id="route" target="_blank" rel="noopener">Como chegar</a>
+        </div>
 
-        </div>
+        <div class="toast" id="toast" role="status"></div>
 
-        <div class="toast" id="toast" role="status"></div>
+      </div>
 
-      </div>
+    </div>
 
-    </div>
+    <h2 style="margin-top:20px">Também nesta loja</h2><div class="grid" id="more"></div>
 
-    <h2 style="margin-top:20px">Também nesta loja</h2><div class="grid" id="more"></div>
-
-  </section>
+  </section>
 
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="js/horarios.js"></script>
+  <script src="js/busca.js"></script>
   <script src="js/demo.js"></script>
   <script type="module" src="js/pages/mapaPage.js"></script>
 
