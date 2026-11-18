@@ -20,4 +20,13 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
         ORDER BY p.loja.id, p.nome
         """)
     List<Produto> buscarDisponiveisNasLojas(@Param("lojaIds") Collection<Long> lojaIds);
+
+    @Query("""
+        SELECT p FROM Produto p
+        JOIN FETCH p.loja
+        JOIN FETCH p.categoria
+        WHERE p.loja.usuarioId = :usuarioId
+        ORDER BY p.nome
+        """)
+    List<Produto> buscarDaLojaDoUsuario(@Param("usuarioId") Long usuarioId);
 }

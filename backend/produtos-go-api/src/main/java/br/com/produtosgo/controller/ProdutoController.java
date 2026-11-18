@@ -6,6 +6,7 @@ import br.com.produtosgo.dto.ProdutoProximoResponse;
 import br.com.produtosgo.service.ProdutoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -18,6 +19,11 @@ public class ProdutoController {
 
     @GetMapping
     public List<ProdutoResponse> listar() { return service.listar(); }
+
+    @GetMapping("/minha-loja")
+    public List<ProdutoResponse> listarMinhaLoja(@AuthenticationPrincipal String email) {
+        return service.listarMinhaLoja(email);
+    }
 
     @GetMapping("/proximos")
     public List<ProdutoProximoResponse> buscarProximos(
@@ -34,17 +40,21 @@ public class ProdutoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProdutoResponse criar(@Valid @RequestBody ProdutoRequest request) {
-        return service.criar(request);
+    public ProdutoResponse criar(@AuthenticationPrincipal String email,
+                                 @Valid @RequestBody ProdutoRequest request) {
+        return service.criar(email, request);
     }
 
     @PutMapping("/{id}")
-    public ProdutoResponse atualizar(@PathVariable Long id,
+    public ProdutoResponse atualizar(@AuthenticationPrincipal String email,
+                                     @PathVariable Long id,
                                      @Valid @RequestBody ProdutoRequest request) {
-        return service.atualizar(id, request);
+        return service.atualizar(email, id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void excluir(@PathVariable Long id) { service.excluir(id); }
+    public void excluir(@AuthenticationPrincipal String email, @PathVariable Long id) {
+        service.excluir(email, id);
+    }
 }

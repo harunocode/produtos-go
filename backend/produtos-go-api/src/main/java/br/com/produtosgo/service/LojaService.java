@@ -2,6 +2,7 @@ package br.com.produtosgo.service;
 
 import br.com.produtosgo.dto.HorarioDia;
 import br.com.produtosgo.dto.LojaProximaResponse;
+import br.com.produtosgo.dto.LojaContaResponse;
 import br.com.produtosgo.repository.LojaRepository;
 import br.com.produtosgo.repository.LojaRepository.LojaProximaRow;
 import java.time.ZonedDateTime;
@@ -43,5 +44,14 @@ public class LojaService {
                 st.aberto(), st.texto(), st.horarioHoje(), deLoja
             );
         }).toList();
+    }
+
+    public LojaContaResponse buscarMinhaLoja(String email) {
+        LojaContaResponse loja = repository.buscarLojaDaConta(email);
+        if (loja == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Esta conta ainda não possui loja.");
+        }
+        return loja;
     }
 }

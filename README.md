@@ -1,5 +1,17 @@
 # Produtos GO — Leaflet + Geolocalização + Spring Boot + PostGIS
 
+## Executar localmente
+
+Com Docker Desktop em execucao, na raiz do projeto:
+
+    docker compose up --build
+
+Abra http://localhost:5500. O Compose inicia PostGIS, API Java 21 e frontend; a base recebe lojas e produtos de exemplo em Canoas. Crie uma conta cliente ou uma conta de loja pela tela inicial. O cadastro de loja consulta o CEP na BrasilAPI para obter coordenadas.
+
+Para parar os servicos, use Ctrl+C ou docker compose down. Os dados ficam no volume do Postgres. Para apagar o banco local e recriar os dados iniciais, use docker compose down -v e depois docker compose up --build.
+
+As credenciais e a chave JWT do Compose sao apenas para desenvolvimento local.
+
 ## Arquitetura
 
 ```text
@@ -20,7 +32,7 @@ PostgreSQL + PostGIS: GEOGRAPHY(POINT, 4326)
 ### Front-end
 - `frontend/index.html`: estrutura das telas.
 - `frontend/css/`: estilos gerais e `mapa.css`.
-- `frontend/js/demo.js`: renderiza a busca e os detalhes dos produtos recebidos da API; autenticação e painel da loja continuam demonstrativos.
+- `frontend/js/demo.js`: telas de login/cadastro, busca, favoritos, curtidas e painel de produtos da loja.
 - `frontend/js/busca.js`: busca tolerante a erros de digitação (usada pelas sugestões e pelo filtro de produtos).
 - `frontend/js/horarios.js`: calcula se a loja está aberta ou fechada, monta o texto ("Aberto · fecha às 18h") e a lista da semana.
 - `frontend/js/config/mapaConfig.js`: URL e parâmetros do mapa.
@@ -65,7 +77,7 @@ Retorna os produtos ativos e com estoque das lojas ativas dentro do raio, junto 
 5. O Repository usa `ST_DWithin` e `ST_Distance`.
 6. O Leaflet desenha os marcadores retornados.
 
-## Preparação e execução
+## Preparação e execução manual no Supabase
 1. Crie o banco PostgreSQL `produtos_go`.
 2. No Supabase, aplique o esquema final de categorias, lojas, horários, produtos e avaliações. Os arquivos `database/01_postgis_lojas.sql` e `02_horarios_lojas.sql` ainda são o esquema legado e não criam as tabelas novas de produtos/categorias.
 3. Cadastre categorias, lojas, horários e produtos. Em `ST_MakePoint`, informe longitude antes da latitude.
@@ -76,12 +88,11 @@ Retorna os produtos ativos e com estoque das lojas ativas dentro do raio, junto 
 A Geolocation API exige contexto seguro: `localhost` ou HTTPS. Não conte com geolocalização ao abrir o arquivo por `file://`.
 
 ## Limitações atuais
-- O catálogo consulta a API de produtos próximos e o mapa consulta as lojas próximas. Favoritos e curtidas ficam apenas na sessão do navegador.
+- O catálogo consulta a API de produtos próximos e o mapa consulta as lojas próximas. Favoritos e curtidas ficam no armazenamento local do navegador por conta.
 - A localização do visitante é usada na consulta e não é gravada no banco por este código.
-- Não foram inventadas lojas de exemplo. A API retorna lista vazia até existirem lojas cadastradas.
-- O CSS original não estava no arquivo recebido; `frontend/css/style.css` permanece como placeholder.
+- O modo local do Compose cria três lojas e seis produtos de demonstração; outras bases começam vazias até existirem lojas cadastradas.
 - Os tiles usados são do OpenStreetMap. Em produção, observe a política de uso dos tiles ou utilize um provedor adequado.
-- O CRUD REST de produtos existe; o painel da loja ainda não usa esse CRUD e o login continua sendo demonstração.
+- Login/cadastro usam JWT; senhas ficam com hash BCrypt. O painel permite criar, editar estoque, pausar/ativar e excluir produtos da própria loja.
 - A busca usa os horários cadastrados no banco. Ainda não há tela para a loja editar seus horários.
 - Horários que viram a madrugada (ex.: 18h–2h) e feriados não são tratados.
 - O selo aberto/fechado dos cards é recalculado a cada minuto; no mapa, o status vem da API no momento da busca.
@@ -96,10 +107,10 @@ Ao digitar no campo de busca, uma lista de produtos aparece abaixo com os nomes 
 - Teclado: ↓ e ↑ navegam, Enter escolhe, Esc fecha. Clicar numa sugestão preenche o campo e filtra os resultados.
 - A busca tolerante e as sugestões rodam no navegador sobre os produtos próximos que a API carregou; uma busca global pode ser movida para o PostgreSQL com `pg_trgm`.
 
-## Cadastro de loja (front-end)
+## Cadastro de loja (frontend e API)
 - Não existe etapa de aprovação: a loja nasce **ativa** (selo "Loja ativa") e cada produto cadastrado com estoque maior que zero aparece na busca dos clientes na hora. Produtos pausados ou sem estoque ficam fora da busca.
-- Na demonstração, a loja nova entra em `SHOPS` com valores fictícios: distância (0,5 a 3 km) calculada a partir do CEP e horário de funcionamento padrão por categoria, igual ao `02_horarios_lojas.sql`. Sem avaliações ainda.
-- Os dados vivem só na memória da página: ao recarregar, a loja e seus produtos somem.
+- O cadastro da loja grava endereço aproximado do CEP, categoria e coordenadas; horários recebem um padrão inicial de segunda a sábado.
+- Contas e produtos ficam no Postgres; favoritos e curtidas ficam no armazenamento local do navegador. A área de avaliações ainda não permite enviar avaliações.
 
 ## Favoritos e curtidos (front-end)
 - **Favoritos** e **Curtidos** são por produto: a chave é `índiceDaLoja|nomeDoProduto`. Favoritar o pão não favorita o bolo, mesmo sendo da mesma loja, e produtos de mesmo nome em lojas diferentes (ex.: Chave de fenda) são independentes.
@@ -115,7 +126,7 @@ Aplicadas em `demo.js` ao criar conta, nesta ordem:
 
 4. Cadastro de lojista: o CNPJ é obrigatório (14 dígitos, com máscara automática `00.000.000/0000-00`). O CPF não é mais aceito. A validação confere só a quantidade de dígitos, não o dígito verificador.
 
-O login continua exigindo apenas e-mail válido e senha de 6+ caracteres. Estas regras rodam só no navegador (demonstração): quando o cadastro for para a API, repita-as no back-end.
+O backend valida e-mail e senha com pelo menos 8 caracteres; as senhas são armazenadas com BCrypt.
 
 ## Modelo para documentar cada funcionalidade
 1. Objetivo e ator.
@@ -128,8 +139,6 @@ O login continua exigindo apenas e-mail válido e senha de 6+ caracteres. Estas 
 8. Cenários de teste.
 
 ## Próximas etapas
-1. Criar cadastro de lojas com endereço e coordenadas reais.
-2. Integrar o painel de cadastro da loja ao CRUD REST de produtos.
-3. Implementar autenticação e validação de propriedade da loja.
-4. Criar telas para cadastrar categorias, lojas e horários.
-5. Criar testes para raio, categoria e ordenação por distância.
+1. Criar telas para a loja editar os horários e receber avaliações.
+2. Configurar segredos, domínio, tiles e banco gerenciado para produção.
+3. Cobrir a busca espacial, autenticação e CRUD com testes automatizados.

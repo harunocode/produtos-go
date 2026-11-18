@@ -6,8 +6,10 @@ export const authService = {
     method: "POST",
     body: JSON.stringify(credenciais),
   }),
-  cadastrar: (dados) => apiRequest("/auth/registro", {
+  cadastrar: (dados) => apiRequest("/auth/register", {
     method: "POST",
     body: JSON.stringify(dados),
   }),
 };
+
+window.produtosGoAuthService = authService;

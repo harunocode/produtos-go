@@ -49,3 +49,5 @@ export async function obterLocalizacaoPorCep(valorCep) {
   localizacoesPorCep.set(cep, localizacao);
   return localizacao;
 }
+
+window.obterLocalizacaoPorCep = obterLocalizacaoPorCep;

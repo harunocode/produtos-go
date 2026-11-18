@@ -1,6 +1,7 @@
 package br.com.produtosgo.repository;
 
 import br.com.produtosgo.dto.HorarioDia;
+import br.com.produtosgo.dto.LojaContaResponse;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,5 +71,19 @@ public class LojaRepository {
                     rs.getObject("horario_fechamento", LocalTime.class)));
         }, lojaIds.toArray());
         return porLoja;
+    }
+
+    public LojaContaResponse buscarLojaDaConta(String email) {
+        List<LojaContaResponse> lojas = jdbcTemplate.query("""
+            SELECT l.id, l.nome, l.categoria_id, c.nome AS categoria
+              FROM lojas l
+              JOIN categorias c ON c.id = l.categoria_id
+              JOIN usuarios u ON u.id = l.usuario_id
+             WHERE u.email = ?
+            """, (rs, row) -> new LojaContaResponse(
+                rs.getLong("id"), rs.getString("nome"),
+                rs.getInt("categoria_id"), rs.getString("categoria")
+            ), email);
+        return lojas.isEmpty() ? null : lojas.get(0);
     }
 }

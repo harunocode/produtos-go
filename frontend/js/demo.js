@@ -468,3 +468,171 @@ $("q").addEventListener("blur",fecharSug);
 $('doc').addEventListener('input',function(){var v=this.value.replace(/\D/g,'').slice(0,14);this.value=v.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2')});
 
 setInterval(refreshHorarios,60000);
+
+// Fluxos conectados à API: autenticação real e painel persistido da loja.
+$('catSel').innerHTML=CATS.slice(1).map(function(c,i){
+  return '<option value="'+(i+1)+'">'+esc(c[1])+'</option>';
+}).join('');
+
+function requestDadosProduto(p){
+  return {nome:p.n,preco:Number(p.p),estoque:Number(p.est),descricao:p.descricao||'',
+    ativo:!!p.on,categoriaId:Number(loja.categoriaId),lojaId:Number(loja.id)};
+}
+
+async function recarregarProdutosDaLoja(){
+  var api=window.produtosGoApiRequest;
+  var resposta=await api('/produtos/minha-loja');
+  var categoria=categoriaDoBanco(loja.categoria);
+  var emoji=(CATS.find(function(c){return c[0]===categoria})||CATS[0])[2];
+  loja.meus=resposta.map(function(p){return {id:p.id,n:p.nome,p:Number(p.preco),est:p.estoque,
+    on:!!p.ativo,e:emoji,descricao:p.descricao||''};});
+}
+
+async function carregarPainelLoja(){
+  var api=window.produtosGoApiRequest;
+  var dados=await api('/lojas/minha');
+  loja={id:dados.id,nome:dados.nome,categoriaId:dados.categoriaId,
+    categoria:dados.categoria,status:'ATIVO',meus:[]};
+  await recarregarProdutosDaLoja();
+  $('whoB').className='badge ok';$('whoB').textContent='Loja ativa';
+  renderLoja();
+}
+
+async function salvarProdutoLoja(p){
+  try{
+    await window.produtosGoApiRequest('/produtos/'+p.id,{method:'PUT',body:JSON.stringify(requestDadosProduto(p))});
+    $('pErr').textContent='';await recarregarProdutosDaLoja();renderLoja();
+  }catch(erro){$('pErr').textContent=erro.message||'Nao foi possivel salvar o produto.'}
+}
+
+renderLoja=function(){
+  hideAll();$('vLoja').hidden=false;$('topo').hidden=false;
+  $('lojaT').textContent='Painel de '+loja.nome;
+  var corpo=$('mb');corpo.innerHTML='';$('me').hidden=loja.meus.length>0;
+  loja.meus.forEach(function(p){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+esc(p.e)+' '+esc(p.n)+(p.est===0?' <span class=badge>Sem estoque</span>':'')+
+      (p.on?'':' <span class=badge>Pausado</span>')+'</td><td class=num>'+money(p.p)+'</td>'+
+      '<td class=num><button class=mini aria-label="Diminuir estoque">-</button> '+p.est+
+      ' <button class=mini aria-label="Aumentar estoque">+</button></td>'+
+      '<td><button class="mini w">'+(p.on?'Pausar':'Ativar')+'</button> '+
+      '<button class="mini w" aria-label="Excluir produto">Excluir</button></td>';
+    var botoes=tr.querySelectorAll('button');
+    botoes[0].onclick=function(){if(p.est>0){p.est--;salvarProdutoLoja(p)}};
+    botoes[1].onclick=function(){p.est++;salvarProdutoLoja(p)};
+    botoes[2].onclick=function(){p.on=!p.on;salvarProdutoLoja(p)};
+    botoes[3].onclick=async function(){
+      if(!confirm('Excluir '+p.n+'?'))return;
+      try{await window.produtosGoApiRequest('/produtos/'+p.id,{method:'DELETE'});
+        await recarregarProdutosDaLoja();renderLoja()}
+      catch(erro){$('pErr').textContent=erro.message||'Nao foi possivel excluir o produto.'}
+    };
+    corpo.appendChild(tr);
+  });
+  $('rv2').innerHTML='<div class=empty>Ainda sem avaliacoes.</div>';
+  $('lNote').textContent='Produtos ativos e com estoque aparecem na busca dos clientes.';
+};
+
+$('enter').onclick=async function(){
+  var email=$('em').value.trim(),senha=$('pw').value,up=mode==='up';
+  var tipo=up?tp:null,lojaNova=up&&tipo==='ESTABELECIMENTO',cnpj=$('doc').value.replace(/\D/g,'');
+  var erro=$('erro');
+  function falha(m){erro.textContent=m}
+  if(!/^\S+@\S+\.\S+$/.test(email))return falha('Informe um e-mail valido.');
+  if(up){
+    if(senha.length<8||!(/\d/.test(senha))||!(/[^\p{L}\p{N}\s]/u.test(senha)))
+      return falha('Use uma senha com 8 caracteres, numero e caractere especial.');
+    if(senha!==$('pw2').value)return falha('As senhas nao correspondem.');
+    if(!$('nome').value.trim())return falha('Informe seu nome.');
+  }else if(senha.length<8)return falha('A senha precisa ter pelo menos 8 caracteres.');
+  if(lojaNova&&!$('lj').value.trim())return falha('Informe o nome da loja.');
+  if(lojaNova&&cnpj.length!==14)return falha('Informe um CNPJ com 14 digitos.');
+  if(lojaNova&&$('cep').value.replace(/\D/g,'').length!==8)return falha('Informe um CEP com 8 digitos.');
+  $('enter').disabled=true;erro.textContent='Conectando...';
+  try{
+    var resultado;
+    if(up){
+      var dados={name:$('nome').value.trim(),email:email,password:senha,type:tipo};
+      if(lojaNova){
+        var localizacao=await window.obterLocalizacaoPorCep($('cep').value);
+        dados.lojaNome=$('lj').value.trim();dados.cnpj=cnpj;dados.categoriaId=Number($('catSel').value);
+        dados.cep=$('cep').value.replace(/\D/g,'');dados.latitude=localizacao.latitude;dados.longitude=localizacao.longitude;
+      }
+      resultado=await window.produtosGoAuthService.cadastrar(dados);
+    }else resultado=await window.produtosGoAuthService.entrar({email:email,password:senha});
+    localStorage.setItem('produtosGoToken',resultado.token);
+    user={nome:up?$('nome').value.trim():email.split('@')[0],email:resultado.email,tipo:resultado.type};
+    localStorage.setItem('produtosGoUsuario',JSON.stringify(user));
+    carregarListasDoUsuario();
+    $('pw').value='';$('pw2').value='';$('topo').hidden=false;
+    $('whoN').textContent='Ola, '+user.nome;
+    if(user.tipo==='ESTABELECIMENTO')await carregarPainelLoja();
+    else{$('whoB').className='badge';$('whoB').textContent='Cliente';loja=null;
+      lastTab='busca';goTab('busca');render()}
+    erro.textContent='';location.hash=loja?'loja':'busca';
+  }catch(ex){falha(ex.message||'Nao foi possivel conectar. Verifique seus dados e tente novamente.')}
+  finally{$('enter').disabled=false}
+};
+
+$('out').onclick=function(){
+  localStorage.removeItem('produtosGoToken');localStorage.removeItem('produtosGoUsuario');
+  user=null;loja=null;cur=null;hideAll();$('topo').hidden=true;$('vLogin').hidden=false;
+  mode='in';fields();location.hash='login';
+};
+
+$('pa').onclick=async function(){
+  var nome=$('pn').value.trim(),preco=Number($('pp').value),estoque=Number($('pe').value);
+  if(!nome)return $('pErr').textContent='Informe o nome do produto.';
+  if(!Number.isFinite(preco)||preco<0)return $('pErr').textContent='Informe um preco valido.';
+  if(!Number.isInteger(estoque)||estoque<0)return $('pErr').textContent='O estoque nao pode ser negativo.';
+  try{
+    await window.produtosGoApiRequest('/produtos',{method:'POST',body:JSON.stringify({
+      nome:nome,preco:preco,estoque:estoque,descricao:'',ativo:true,
+      categoriaId:Number(loja.categoriaId),lojaId:Number(loja.id)
+    })});
+    $('pn').value='';$('pp').value='';$('pe').value=1;$('pErr').textContent='';
+    await recarregarProdutosDaLoja();renderLoja();
+  }catch(ex){$('pErr').textContent=ex.message||'Nao foi possivel salvar o produto.'}
+};
+
+window.addEventListener('DOMContentLoaded',async function(){
+  try{
+    var salvo=localStorage.getItem('produtosGoUsuario'),token=localStorage.getItem('produtosGoToken');
+    if(!salvo||!token)return;
+    user=JSON.parse(salvo);carregarListasDoUsuario();$('topo').hidden=false;
+    $('whoN').textContent='Ola, '+user.nome;
+    if(user.tipo==='ESTABELECIMENTO')await carregarPainelLoja();
+    else{$('whoB').className='badge';$('whoB').textContent='Cliente';lastTab='busca';goTab('busca')}
+  }catch(ex){
+    localStorage.removeItem('produtosGoToken');localStorage.removeItem('produtosGoUsuario');
+    user=null;loja=null;
+  }
+},{once:true});
+
+function carregarListasDoUsuario(){
+  var email=(user&&user.email)||'anonimo';
+  try{
+    var estado=JSON.parse(localStorage.getItem('produtosGoListas:'+email)||'{}');
+    favs=estado.favs||{};saved=estado.saved||{};
+  }catch(_){favs={};saved={}}
+}
+
+function salvarListasDoUsuario(){
+  var email=(user&&user.email)||'anonimo';
+  localStorage.setItem('produtosGoListas:'+email,JSON.stringify({favs:favs,saved:saved}));
+}
+
+var salvarCurtidaOriginal=$('sv').onclick;
+$('sv').onclick=function(evento){salvarCurtidaOriginal(evento);salvarListasDoUsuario()};
+var favoritarOriginal=$('fv').onclick;
+$('fv').onclick=function(evento){favoritarOriginal(evento);salvarListasDoUsuario()};
+var swipeOriginal=swipe;
+swipe=function(direcao,remover){swipeOriginal(direcao,remover);salvarListasDoUsuario()};
+var cardCurtidoOriginal=cardCurtido;
+cardCurtido=function(){
+  var no=cardCurtidoOriginal.apply(null,arguments);
+  no.querySelector('.card-x').addEventListener('click',function(){
+    setTimeout(salvarListasDoUsuario,0);
+  });
+  return no;
+};

@@ -56,13 +56,13 @@
 
 <label>Senha<input id='pw' type='password' autocomplete='current-password'></label>
 
-<small class='toast' id='hSenha' hidden>A senha deve ter no mínimo 6 caracteres, com pelo menos 1 número e 1 caractere especial (ex.: ! @ # $ %).</small>
+<small class='toast' id='hSenha' hidden>A senha deve ter no mínimo 8 caracteres, com pelo menos 1 número e 1 caractere especial (ex.: ! @ # $ %).</small>
 
 <label id='lConf' hidden>Confirmar senha<input id='pw2' type='password' autocomplete='new-password'></label>
 
 <button class='btn' id='enter'>Entrar</button><div class='err' id='erro' role='alert'></div>
 
-<small class='toast'>Demonstração: e-mails que começam com “loja” entram como estabelecimento (ex.: loja@demo.com). Os demais entram como cliente. Senha: 6 caracteres ou mais (no cadastro, também 1 número e 1 caractere especial).</small>
+<small class='toast'>Crie uma conta para buscar produtos ou cadastrar sua loja. Para localizar lojas, permita a localização ou informe um CEP.</small>
 
 </div></section>
 
@@ -176,6 +176,7 @@
   <script src="js/horarios.js"></script>
   <script src="js/busca.js"></script>
   <script src="js/demo.js"></script>
+  <script type="module" src="js/services/authService.js"></script>
   <script type="module" src="js/pages/mapaPage.js"></script>
 
 </body>

@@ -11,9 +11,14 @@ import br.com.produtosgo.exception.RecursoNaoEncontradoException;
 import br.com.produtosgo.repository.CategoriaRepository;
 import br.com.produtosgo.repository.LojaJpaRepository;
 import br.com.produtosgo.repository.ProdutoRepository;
+import br.com.produtosgo.repository.UsersRepository;
+import br.com.produtosgo.entity.Users;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.Objects;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,20 +30,30 @@ public class ProdutoService {
     private final LojaJpaRepository lojaRepository;
     private final CategoriaRepository categoriaRepository;
     private final LojaService lojaService;
+    private final UsersRepository usersRepository;
 
     public ProdutoService(ProdutoRepository repository,
                           LojaJpaRepository lojaRepository,
                           CategoriaRepository categoriaRepository,
-                          LojaService lojaService) {
+                          LojaService lojaService,
+                          UsersRepository usersRepository) {
         this.repository = repository;
         this.lojaRepository = lojaRepository;
         this.categoriaRepository = categoriaRepository;
         this.lojaService = lojaService;
+        this.usersRepository = usersRepository;
     }
 
     @Transactional(readOnly = true)
     public List<ProdutoResponse> listar() {
         return repository.findAll().stream().map(ProdutoResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProdutoResponse> listarMinhaLoja(String email) {
+        Users usuario = buscarUsuario(email);
+        return repository.buscarDaLojaDoUsuario(usuario.getId()).stream()
+            .map(ProdutoResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -68,23 +83,39 @@ public class ProdutoService {
     }
 
     @Transactional
-    public ProdutoResponse criar(ProdutoRequest request) {
+    public ProdutoResponse criar(String email, ProdutoRequest request) {
         Produto produto = new Produto();
-        aplicarDados(produto, request);
+        aplicarDados(produto, request, email);
         return ProdutoResponse.from(repository.save(produto));
     }
 
     @Transactional
-    public ProdutoResponse atualizar(Long id, ProdutoRequest request) {
+    public ProdutoResponse atualizar(String email, Long id, ProdutoRequest request) {
         Produto produto = buscarEntidade(id);
-        aplicarDados(produto, request);
+        validarLojaDaConta(email, produto.getLoja().getId());
+        aplicarDados(produto, request, email);
         return ProdutoResponse.from(repository.save(produto));
     }
 
     @Transactional
-    public void excluir(Long id) {
+    public void excluir(String email, Long id) {
         Produto produto = buscarEntidade(id);
+        validarLojaDaConta(email, produto.getLoja().getId());
         repository.delete(produto);
+    }
+
+    private Users buscarUsuario(String email) {
+        return usersRepository.findByEmail(email).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Conta não encontrada."));
+    }
+
+    private void validarLojaDaConta(String email, Long lojaId) {
+        Loja loja = lojaRepository.findById(lojaId).orElseThrow(() ->
+            new RecursoNaoEncontradoException("Loja " + lojaId + " não encontrada."));
+        if (!Objects.equals(loja.getUsuarioId(), buscarUsuario(email).getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "Você só pode alterar produtos da sua própria loja.");
+        }
     }
 
     private Produto buscarEntidade(Long id) {
@@ -92,13 +123,19 @@ public class ProdutoService {
             .orElseThrow(() -> new RecursoNaoEncontradoException("Produto " + id + " não encontrado."));
     }
 
-    private void aplicarDados(Produto produto, ProdutoRequest request) {
+    private void aplicarDados(Produto produto, ProdutoRequest request, String email) {
+        validarLojaDaConta(email, request.lojaId());
         Loja loja = lojaRepository.findById(request.lojaId())
             .orElseThrow(() -> new RecursoNaoEncontradoException(
                 "Loja " + request.lojaId() + " não encontrada."));
         Categoria categoria = categoriaRepository.findById(request.categoriaId())
             .orElseThrow(() -> new RecursoNaoEncontradoException(
                 "Categoria " + request.categoriaId() + " não encontrada."));
+
+        if (!Objects.equals(loja.getCategoriaId(), categoria.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "O produto deve usar a categoria da loja.");
+        }
 
         produto.setNome(request.nome());
         produto.setPreco(request.preco());

@@ -1,11 +1,13 @@
 package br.com.produtosgo.controller;
 
 import br.com.produtosgo.dto.LojaProximaResponse;
+import br.com.produtosgo.dto.LojaContaResponse;
 import br.com.produtosgo.service.LojaService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +21,11 @@ public class LojaController {
 
     public LojaController(LojaService service) {
         this.service = service;
+    }
+
+    @GetMapping("/minha")
+    public LojaContaResponse buscarMinhaLoja(@AuthenticationPrincipal String email) {
+        return service.buscarMinhaLoja(email);
     }
 
     @GetMapping("/proximas")

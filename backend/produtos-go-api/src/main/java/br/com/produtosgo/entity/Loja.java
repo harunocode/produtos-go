@@ -12,7 +12,15 @@ public class Loja {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "usuario_id")
+    private Long usuarioId;
+
+    @Column(name = "categoria_id", nullable = false)
+    private Integer categoriaId;
+
     protected Loja() {}
 
     public Long getId() { return id; }
+    public Long getUsuarioId() { return usuarioId; }
+    public Integer getCategoriaId() { return categoriaId; }
 }
